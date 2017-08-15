@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+# dwc - DATADVANCE Words Calculator
+import string
+from argparse import ArgumentParser
+from collections import Counter
+from itertools import chain
+
+
+def main(file_name, statistic_length=None):
+    opened_file = open(file_name, 'r')
+    words_by_line = (get_line_words(line) for line in opened_file)
+    words_counter = Counter(chain(*(line_words for line_words in words_by_line)))
+
+    most_common = (f'{word}: {frequency}' for word, frequency in words_counter.most_common(statistic_length))
+    print('\n'.join(most_common))
+
+
+def get_line_words(line):
+    all_words = (clean_word(word) for word in line.split())
+    return [word for word in all_words if word]
+
+
+def clean_word(word):
+    letters = string.ascii_letters
+    word_symbols = (symbol for symbol in word if symbol in letters)
+    return ''.join(word_symbols)
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument('file', help="File path")
+
+    parser.add_argument('-l', '--length', type=int, help='Length of statistic output in words', default=0)
+    args = parser.parse_args()
+
+    main(args.file, args.length or None)
